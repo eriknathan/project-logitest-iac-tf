@@ -1,45 +1,31 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
-terraform {
-  backend "s3" {
-    bucket = "s3-erik-tf"
-    key    = "logiteste/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-# --------------------------------------------------------------------------------
-
 module "vpc" {
   source = "git::https://github.com/eriknathan/terraform-modules.git//modules/vpc?ref=main"
 
-  vpc_cidr          = "10.1.0.0/16"
-  subnet_cidr       = "10.1.1.0/24"
-  availability_zone = "us-east-1a"
-  project_name      = "logitest"
+  vpc_cidr          = var.vpc_cidr
+  subnet_cidr       = var.subnet_cidr
+  availability_zone = var.availability_zone
+  project_name      = var.project_name
   tags              = local.tags
 }
 
 module "ec2_instance" {
   source = "git::https://github.com/eriknathan/terraform-modules.git//modules/ec2-instance?ref=main"
 
-  ami_id             = "ami-084568db4383264d4"
-  instance_type      = "t2.micro"
+  ami_id             = var.ami_id
+  instance_type      = var.instance_type
   subnet_id          = module.vpc.subnet_id
-  project_name       = "logitest"
+  project_name       = var.project_name
   disk_size          = 40
   security_group_ids = [module.sg.security_group_id]
   tags               = local.tags
 }
 
-
 module "sg" {
-  source       = "git::https://github.com/eriknathan/terraform-modules.git//modules/security-group?ref=main"
-  project_name = "logitest"
+  source = "git::https://github.com/eriknathan/terraform-modules.git//modules/security-group?ref=main"
+
+  project_name = var.project_name
   vpc_id       = module.vpc.vpc_id
-  description  = "Permitir acesso SSH e HTTP"
+  description  = var.description_sg
   tags         = local.tags
 
   ingress_rules = [
@@ -47,7 +33,7 @@ module "sg" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      cidr_blocks = ["201.71.62.130/32"]
+      cidr_blocks = ["${var.meu_ip}/32"]
     },
     {
       from_port   = 80
@@ -58,14 +44,24 @@ module "sg" {
   ]
 }
 
+module "bucket" {
+  source       = "git::https://github.com/eriknathan/terraform-modules.git//modules/s3-bucket?ref=main"
+
+  project_name = var.project_name
+  nome_bucket  = var.nome_bucket
+  tags         = local.tags
+}
+
+module "iam-bucket" {
+  source       = "git::https://github.com/eriknathan/terraform-modules.git//modules/iam-bucket-access?ref=main"
+
+  project_name = var.project_name
+  for_each     = toset(var.usuarios)
+  user_name = each.value
+  bucket_arn   = module.bucket.bucket_arn
+  tags         = local.tags
+}
+
 # --------------------------------------------------------------------------------
 
-locals {
-  tags = {
-    Departament  = "DevOps"
-    Organization = "Infrastructure and Operations"
-    Project      = "logitest"
-    Enviroment   = "Development"
-    Author       = "Erik Nathan"
-  }
-}
+
