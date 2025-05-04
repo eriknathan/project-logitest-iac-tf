@@ -2,7 +2,7 @@ locals {
   tags = {
     Departament  = "DevOps"
     Organization = "Infrastructure and Operations"
-    Project      = "epiteto"
+    Project      = "logitest"
     Enviroment   = "Development"
     Author       = "Erik Nathan"
   }

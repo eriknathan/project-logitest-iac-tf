@@ -6,11 +6,6 @@ variable "project_name" {
   description = "Nome do projeto, usado para nomear os recursos AWS."
 }
 
-# variable "tags" {
-#   type        = map(string)
-#   description = "Mapa de tags padrão aplicadas a todos os recursos AWS."
-# }
-
 # ========================================
 # Networking - VPC and Subnet
 # ========================================
@@ -42,6 +37,11 @@ variable "instance_type" {
   description = "Tipo de instância EC2 (ex: t2.micro, t3.small)."
 }
 
+variable "disk_size" {
+  type        = number
+  description = "Tamanho do disco do EC2"
+}
+
 # ========================================
 # Security Group
 # ========================================
@@ -59,7 +59,7 @@ variable "meu_ip" {
 # S3 Bucket
 # ========================================
 
-variable "nome_bucket" {
+variable "bucket_name" {
   type        = string
   description = "Nome do Bucket S3 que será criado. Deve ser único globalmente na AWS."
 }

@@ -15,7 +15,7 @@ module "ec2_instance" {
   instance_type      = var.instance_type
   subnet_id          = module.vpc.subnet_id
   project_name       = var.project_name
-  disk_size          = 40
+  disk_size          = var.disk_size
   security_group_ids = [module.sg.security_group_id]
   tags               = local.tags
 }
@@ -33,7 +33,7 @@ module "sg" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      cidr_blocks = ["${var.meu_ip}/32"]
+      cidr_blocks = ["${var.meu_ip}"]
     },
     {
       from_port   = 80
@@ -48,7 +48,7 @@ module "bucket" {
   source       = "git::https://github.com/eriknathan/terraform-modules.git//modules/s3-bucket?ref=main"
 
   project_name = var.project_name
-  nome_bucket  = var.nome_bucket
+  bucket_name  = var.bucket_name
   tags         = local.tags
 }
 
@@ -57,7 +57,7 @@ module "iam-bucket" {
 
   project_name = var.project_name
   for_each     = toset(var.usuarios)
-  user_name = each.value
+  user_name    = each.value
   bucket_arn   = module.bucket.bucket_arn
   tags         = local.tags
 }
