@@ -2,11 +2,11 @@ name: "Terraform Workflow"
 
 on:
   workflow_call:
+    secrets:
+      aws-assume-role-arn:
+        required: true
     inputs:
       environment:
-        type: string
-        required: true
-      aws-assume-role-arn:
         type: string
         required: true
       aws-region:
@@ -36,7 +36,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.aws-assume-role-arn }}
+          role-to-assume: ${{ secrets.aws-assume-role-arn }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ inputs.aws-region }}
 
